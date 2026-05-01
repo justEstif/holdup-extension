@@ -1,10 +1,11 @@
 ---
 # holdup-extension-gp75
 title: Build fullscreen interstitial page
-status: todo
+status: in-progress
 type: task
+priority: normal
 created_at: 2026-05-01T01:56:02Z
-updated_at: 2026-05-01T01:56:02Z
+updated_at: 2026-05-01T02:45:29Z
 parent: holdup-extension-fpjy
 blocked_by:
     - holdup-extension-tbru
