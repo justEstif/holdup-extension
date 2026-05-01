@@ -7,3 +7,5 @@ dist/
 !.env.example
 .beans/
 .beans.yml
+_metadata/
+another-idea.md
