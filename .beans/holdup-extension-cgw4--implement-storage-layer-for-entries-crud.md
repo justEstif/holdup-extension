@@ -1,10 +1,11 @@
 ---
 # holdup-extension-cgw4
 title: Implement storage layer for entries CRUD
-status: todo
+status: in-progress
 type: task
+priority: normal
 created_at: 2026-05-01T01:55:41Z
-updated_at: 2026-05-01T01:55:41Z
+updated_at: 2026-05-01T03:17:19Z
 parent: holdup-extension-fpjy
 blocked_by:
     - holdup-extension-tbru

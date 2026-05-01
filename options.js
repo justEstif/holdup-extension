@@ -19,15 +19,15 @@ const advancedToggle = byId('advancedToggle'),
 const domainList = byId('domainList'),
   emptyState = byId('emptyState');
 
-let editingIndex = -1;
+let editingId = null;
 
 form.addEventListener('submit', handleAdd);
 advancedToggle.addEventListener('click', toggleAdvanced);
 cooldownTypeInput.addEventListener('change', toggleCooldownMinutes);
 
 async function loadEntries() {
-  const { domains } = await chrome.storage.sync.get('domains');
-  renderEntries(domains || []);
+  const domains = await HoldupStorage.getEntries();
+  renderEntries(domains);
 }
 
 function renderEntries(domains) {
@@ -37,26 +37,26 @@ function renderEntries(domains) {
     return;
   }
   emptyState.classList.add('hidden');
-  domains.forEach((entry, i) => {
-    domainList.appendChild(buildEntryCard(entry, i));
+  domains.forEach((entry) => {
+    domainList.appendChild(buildEntryCard(entry));
   });
 }
 
-function buildEntryCard(entry, index) {
-  if (editingIndex === index) return buildEditCard(entry);
-  return buildViewCard(entry, index);
+function buildEntryCard(entry) {
+  if (editingId === entry.id) return buildEditCard(entry);
+  return buildViewCard(entry);
 }
 
-function buildViewCard(entry, index) {
+function buildViewCard(entry) {
   const card = document.createElement('div');
   card.className =
     'bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors';
   card.innerHTML = buildViewHtml(entry);
   card.addEventListener('click', (e) => {
     if (e.target.closest('.remove-btn')) return;
-    startEdit(index);
+    startEdit(entry.id);
   });
-  wireRemoveButton(card, index);
+  wireRemoveButton(card, entry.id);
   return card;
 }
 
@@ -76,12 +76,12 @@ function buildViewHtml(entry) {
     </div>`;
 }
 
-function wireRemoveButton(card, index) {
+function wireRemoveButton(card, id) {
   const btn = card.querySelector('.remove-btn');
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (btn.dataset.confirming) {
-      removeEntry(index);
+      removeEntry(id);
       return;
     }
     btn.dataset.confirming = 'true';
@@ -143,59 +143,64 @@ function wireEditCard(card) {
 }
 
 async function handleSave() {
-  const card = domainList.children[editingIndex];
+  if (!editingId) return;
+  const card = findEditCard();
   if (!card) return;
-  const host = card.querySelector('.edit-host').value.trim();
-  const message = card.querySelector('.edit-message').value.trim();
-  if (!host || !message) return;
-  const mode = card.querySelector('.edit-mode').value;
-  const cooldownType = card.querySelector('.edit-cooldown-type').value;
-  const minutesEl = card.querySelector('.edit-cooldown-minutes');
-  const cooldownMinutes = parseInt(minutesEl.value, 10) || 30;
-  const redirectUrl = card.querySelector('.edit-redirect-url').value.trim();
-  const entry = { host, message, mode, cooldownType, cooldownMinutes, redirectUrl };
-  const { domains } = await chrome.storage.sync.get('domains');
-  const updated = [...(domains || [])];
-  updated[editingIndex] = entry;
-  await chrome.storage.sync.set({ domains: updated });
-  editingIndex = -1;
-  renderEntries(updated);
+  const updates = collectEditFields(card);
+  if (!updates.host || !updates.message) return;
+  await HoldupStorage.updateEntry(editingId, updates);
+  editingId = null;
+  loadEntries();
+}
+
+function findEditCard() {
+  const cards = domainList.children;
+  for (const card of cards) {
+    if (card.querySelector('.save-btn')) return card;
+  }
+  return null;
+}
+
+function collectEditFields(card) {
+  return {
+    host: card.querySelector('.edit-host').value.trim(),
+    message: card.querySelector('.edit-message').value.trim(),
+    mode: card.querySelector('.edit-mode').value,
+    cooldownType: card.querySelector('.edit-cooldown-type').value,
+    cooldownMinutes: parseInt(card.querySelector('.edit-cooldown-minutes').value, 10) || 30,
+    redirectUrl: card.querySelector('.edit-redirect-url').value.trim(),
+  };
 }
 
 function handleCancel() {
-  editingIndex = -1;
+  editingId = null;
   loadEntries();
 }
 
-function startEdit(index) {
-  editingIndex = index;
+function startEdit(id) {
+  editingId = id;
   loadEntries();
 }
 
-async function removeEntry(index) {
-  const { domains } = await chrome.storage.sync.get('domains');
-  const updated = (domains || []).filter((_, i) => i !== index);
-  await chrome.storage.sync.set({ domains: updated });
-  editingIndex = -1;
-  renderEntries(updated);
+async function removeEntry(id) {
+  editingId = null;
+  await HoldupStorage.deleteEntry(id);
+  loadEntries();
 }
 
 async function handleAdd(e) {
   e.preventDefault();
   const host = hostInput.value.trim();
   const message = messageInput.value.trim();
-  const mode = modeInput.value;
   if (!host || !message) return;
+  const mode = modeInput.value;
   const cooldownType = cooldownTypeInput.value;
   const cooldownMinutes = parseInt(cooldownMinutesInput.value, 10) || 30;
   const redirectUrl = redirectUrlInput.value.trim();
-  const entry = { host, message, mode, cooldownType, cooldownMinutes, redirectUrl };
-  const { domains } = await chrome.storage.sync.get('domains');
-  const updated = [...(domains || []), entry];
-  await chrome.storage.sync.set({ domains: updated });
+  await HoldupStorage.addEntry({ host, message, mode, cooldownType, cooldownMinutes, redirectUrl });
   resetForm();
-  editingIndex = -1;
-  renderEntries(updated);
+  editingId = null;
+  loadEntries();
 }
 
 function resetForm() {

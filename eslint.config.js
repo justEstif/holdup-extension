@@ -9,7 +9,10 @@ export default [
       sourceType: 'module',
       globals: {
         ...globals.browser,
+        ...globals.serviceworker,
         chrome: 'readonly',
+        globalThis: 'writable',
+        HoldupStorage: 'readonly',
       },
     },
     rules: {

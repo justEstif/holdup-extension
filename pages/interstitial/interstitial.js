@@ -4,7 +4,7 @@
   'use strict';
 
   const params = new URLSearchParams(window.location.search);
-  const entryId = params.get('entry') || '';
+  const entryHost = params.get('entry') || '';
   const fallbackMsg = params.get('msg') || 'Are you sure about this?';
 
   async function init() {
@@ -14,10 +14,8 @@
   }
 
   async function loadEntry() {
-    const { domains } = await chrome.storage.sync.get('domains');
-    const list = domains || [];
-    const found = list.find((d) => d.host === entryId);
-    return found || { host: entryId, message: fallbackMsg };
+    const found = await HoldupStorage.getEntryByHost(entryHost);
+    return found || { host: entryHost, message: fallbackMsg };
   }
 
   function renderMessage(entry) {

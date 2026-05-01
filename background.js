@@ -1,12 +1,10 @@
 // Holdup — Background Service Worker
 // Registers all listeners synchronously at top level (MV3 requirement).
 
+importScripts('./storage.js');
+
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.sync.get('domains', (result) => {
-    if (!result.domains) {
-      chrome.storage.sync.set({ domains: [] });
-    }
-  });
+  ensureDomainsExist();
 });
 
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -31,14 +29,17 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
   handleNavigation(details);
 });
 
+async function ensureDomainsExist() {
+  const entries = await HoldupStorage.getEntries();
+  if (entries.length === 0) return;
+}
+
 async function handleNavigation(details) {
   const url = new URL(details.url);
   if (!url.protocol.startsWith('http')) return;
-
-  const { domains } = await chrome.storage.sync.get('domains');
-  const match = findMatch(domains || [], url.hostname);
+  const domains = await HoldupStorage.getEntries();
+  const match = findMatch(domains, url.hostname);
   if (!match) return;
-
   handleMatch(details.tabId, match);
 }
 
@@ -72,34 +73,27 @@ async function handleInterstitialMessage(message) {
 }
 
 async function applyContinueCooldown(host, defaultMinutes) {
-  const entry = await findEntryByHost(host);
+  const entry = await HoldupStorage.getEntryByHost(host);
   if (entry?.cooldownType === 'always') return;
   const minutes =
     entry?.cooldownType === 'time' ? entry.cooldownMinutes || defaultMinutes : defaultMinutes;
   await setCooldown(host, minutes);
 }
 
-async function findEntryByHost(host) {
-  const { domains } = await chrome.storage.sync.get('domains');
-  return (domains || []).find((d) => d.host === host);
-}
-
 async function setCooldown(host, minutes) {
   const key = `cooldown_${host}`;
   const endTime = Date.now() + minutes * 60000;
   await chrome.storage.session.set({ [key]: endTime });
-
-  const { domains } = await chrome.storage.sync.get('domains');
-  await rebuildDynamicRules(domains || []);
+  const domains = await HoldupStorage.getEntries();
+  await rebuildDynamicRules(domains);
   chrome.alarms.create(`cooldown_${host}`, { delayInMinutes: minutes });
 }
 
 async function clearCooldown(host) {
   const key = `cooldown_${host}`;
   await chrome.storage.session.remove(key);
-
-  const { domains } = await chrome.storage.sync.get('domains');
-  await rebuildDynamicRules(domains || []);
+  const domains = await HoldupStorage.getEntries();
+  await rebuildDynamicRules(domains);
 }
 
 async function rebuildDynamicRules(domains) {
