@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Holdup — A personal nudge engine</title>
+    <meta
+      name="description"
+      content="Set reminders for sites you want to think twice about visiting. When you navigate there, Holdup interrupts with your own message."
+    />
+    <link
+      rel="icon"
+      href="https://raw.githubusercontent.com/justEstif/holdup-extension/main/icons/icon48.png"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['system-ui', '-apple-system', 'sans-serif'] },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-slate-50 text-slate-800 antialiased">
+    <!-- Hero -->
+    <main class="min-h-screen flex items-center justify-center px-6 py-20">
+      <div class="max-w-xl text-center">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-sm font-medium mb-8"
+        >
+          <span class="relative flex h-2 w-2">
+            <span
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"
+            ></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+          </span>
+          Coming soon to Chrome Web Store
+        </div>
+
+        <h1 class="text-5xl sm:text-6xl font-bold tracking-tight text-slate-900">Hold up.</h1>
+        <p class="mt-6 text-lg text-slate-600 leading-relaxed max-w-md mx-auto">
+          A personal nudge engine for your browser. You set the reminders. You write the messages.
+          Holdup makes sure you read them.
+        </p>
+
+        <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="https://github.com/justEstif/holdup-extension"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-500 text-white font-semibold rounded-xl hover:bg-amber-600 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+              />
+            </svg>
+            View on GitHub
+          </a>
+          <a
+            href="https://github.com/justEstif/holdup-extension#install"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-100 transition-colors"
+          >
+            Install manually
+          </a>
+        </div>
+
+        <!-- How it works -->
+        <div class="mt-20 text-left">
+          <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide text-center mb-8">
+            How it works
+          </h2>
+          <div class="grid gap-6">
+            <div class="flex items-start gap-4 p-4 bg-white rounded-xl border border-slate-200">
+              <span
+                class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-white text-sm font-bold"
+                >1</span
+              >
+              <div>
+                <p class="font-medium text-slate-800">Add a domain + your message</p>
+                <p class="text-sm text-slate-500 mt-0.5">
+                  Pick overlay or fullscreen mode. Choose your cooldown.
+                </p>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 p-4 bg-white rounded-xl border border-slate-200">
+              <span
+                class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-white text-sm font-bold"
+                >2</span
+              >
+              <div>
+                <p class="font-medium text-slate-800">Visit that site</p>
+                <p class="text-sm text-slate-500 mt-0.5">Holdup intercepts the navigation.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 p-4 bg-white rounded-xl border border-slate-200">
+              <span
+                class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-white text-sm font-bold"
+                >3</span
+              >
+              <div>
+                <p class="font-medium text-slate-800">Read your own words. Decide.</p>
+                <p class="text-sm text-slate-500 mt-0.5">
+                  Go back, continue, get reminded later, or redirect somewhere better.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-20 pt-8 border-t border-slate-200 text-sm text-slate-400">
+          <p>No data collection. No servers. No analytics. Everything stays in your browser.</p>
+          <p class="mt-2">
+            <a
+              href="https://github.com/justEstif/holdup-extension"
+              class="hover:text-amber-500 transition-colors"
+              >GitHub</a
+            >
+            ·
+            <a
+              href="https://github.com/justEstif/holdup-extension/blob/main/PRIVACY.md"
+              class="hover:text-amber-500 transition-colors"
+              >Privacy</a
+            >
+          </p>
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>
