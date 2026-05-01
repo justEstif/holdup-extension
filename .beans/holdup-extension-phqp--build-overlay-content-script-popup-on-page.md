@@ -1,11 +1,11 @@
 ---
 # holdup-extension-phqp
 title: Build overlay content script (popup on page)
-status: in-progress
+status: completed
 type: task
 priority: normal
 created_at: 2026-05-01T01:56:10Z
-updated_at: 2026-05-01T02:54:01Z
+updated_at: 2026-05-01T02:59:11Z
 parent: holdup-extension-fpjy
 blocked_by:
     - holdup-extension-tbru
@@ -24,3 +24,13 @@ Create the overlay popup injected onto pages for overlay-mode entries:
 - [ ] Ensure overlay doesn't break page layout (z-index, position: fixed)
 
 Parent epic: holdup-extension-fpjy
+
+## Summary of Changes
+
+- Rewrote content.js using Shadow DOM (closed mode) for complete style isolation from host pages
+- Light card on frosted backdrop per design spec: white card, amber bar, amber Go back CTA, muted Dismiss button
+- All four buttons wired: Go back (history.back), Dismiss (cooldown + close), Remind me again (short cooldown + close), Redirect (conditional)
+- Entrance animations via Web Animations API: 200ms backdrop fade-in, 250ms card scale-in with prefers-reduced-motion support
+- Escape key closes overlay, focus-visible outlines on all interactive elements
+- Updated background.js: injectOverlay now passes full entry object, uses .then() sequencing for reliable message delivery
+- All files pass npm run check

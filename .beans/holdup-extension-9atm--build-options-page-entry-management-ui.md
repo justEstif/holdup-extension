@@ -1,10 +1,11 @@
 ---
 # holdup-extension-9atm
 title: Build options page (entry management UI)
-status: todo
+status: in-progress
 type: task
+priority: normal
 created_at: 2026-05-01T01:56:18Z
-updated_at: 2026-05-01T01:56:18Z
+updated_at: 2026-05-01T02:59:19Z
 parent: holdup-extension-fpjy
 blocked_by:
     - holdup-extension-cgw4

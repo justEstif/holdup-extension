@@ -65,10 +65,23 @@ function injectOverlay(tabId, entry) {
 
 async function handleInterstitialMessage(message) {
   if (message.action === 'continue') {
-    await setCooldown(message.entryHost, message.cooldownMinutes || 30);
+    await applyContinueCooldown(message.entryHost, message.cooldownMinutes || 30);
   } else if (message.action === 'remind') {
     await setCooldown(message.entryHost, message.delayMinutes || 5);
   }
+}
+
+async function applyContinueCooldown(host, defaultMinutes) {
+  const entry = await findEntryByHost(host);
+  if (entry?.cooldownType === 'always') return;
+  const minutes =
+    entry?.cooldownType === 'time' ? entry.cooldownMinutes || defaultMinutes : defaultMinutes;
+  await setCooldown(host, minutes);
+}
+
+async function findEntryByHost(host) {
+  const { domains } = await chrome.storage.sync.get('domains');
+  return (domains || []).find((d) => d.host === host);
 }
 
 async function setCooldown(host, minutes) {
