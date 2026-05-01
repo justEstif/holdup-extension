@@ -112,6 +112,64 @@
       No domains configured yet.
     </p>
 
+    <details class="mt-12 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+      <summary
+        class="px-5 py-4 bg-white dark:bg-slate-800 cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"
+      >
+        Frequently asked questions
+      </summary>
+      <div
+        class="px-5 py-4 space-y-4 text-sm text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700"
+      >
+        <div>
+          <p class="font-medium text-slate-800 dark:text-slate-200">What does each mode do?</p>
+          <p class="mt-1">
+            <strong class="text-slate-700 dark:text-slate-300">Overlay</strong> shows a popup on top
+            of the page.
+            <strong class="text-slate-700 dark:text-slate-300">Fullscreen</strong> redirects to a
+            separate interstitial page first.
+          </p>
+        </div>
+        <div>
+          <p class="font-medium text-slate-800 dark:text-slate-200">How does cooldown work?</p>
+          <p class="mt-1">
+            After you dismiss a nudge, Holdup won't show it again for that domain until the cooldown
+            expires.
+          </p>
+          <ul class="list-disc list-inside mt-1 space-y-0.5">
+            <li>
+              <strong class="text-slate-700 dark:text-slate-300">Until browser restart</strong> —
+              lasts until you close the browser
+            </li>
+            <li>
+              <strong class="text-slate-700 dark:text-slate-300">For specified minutes</strong> —
+              expires after the time you set
+            </li>
+            <li>
+              <strong class="text-slate-700 dark:text-slate-300">Always ask</strong> — no cooldown,
+              nudge every visit
+            </li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-medium text-slate-800 dark:text-slate-200">What does "Redirect URL" do?</p>
+          <p class="mt-1">
+            Adds a "Go somewhere else" button that takes you to a URL of your choice (e.g. a
+            productive site).
+          </p>
+        </div>
+        <div>
+          <p class="font-medium text-slate-800 dark:text-slate-200">
+            Does Holdup collect any data?
+          </p>
+          <p class="mt-1">
+            No. Everything stays local in your browser via Chrome's built-in storage. No analytics,
+            no servers.
+          </p>
+        </div>
+      </div>
+    </details>
+
     <script src="storage.js"></script>
     <script src="theme.js"></script>
     <script src="options.js"></script>
