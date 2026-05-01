@@ -48,17 +48,19 @@ function findMatch(domains, hostname) {
 
 function handleMatch(tabId, match) {
   if (match.mode === 'overlay') {
-    injectOverlay(tabId, match.message);
+    injectOverlay(tabId, match);
   }
 }
 
-function injectOverlay(tabId, message) {
-  chrome.scripting.executeScript({
-    target: { tabId },
-    files: ['content.js'],
-  });
-
-  chrome.tabs.sendMessage(tabId, { action: 'show-overlay', message });
+function injectOverlay(tabId, entry) {
+  chrome.scripting
+    .executeScript({
+      target: { tabId },
+      files: ['content.js'],
+    })
+    .then(() => {
+      chrome.tabs.sendMessage(tabId, { action: 'show-overlay', entry });
+    });
 }
 
 async function handleInterstitialMessage(message) {

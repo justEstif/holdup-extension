@@ -1,10 +1,11 @@
 ---
 # holdup-extension-phqp
 title: Build overlay content script (popup on page)
-status: todo
+status: in-progress
 type: task
+priority: normal
 created_at: 2026-05-01T01:56:10Z
-updated_at: 2026-05-01T01:56:10Z
+updated_at: 2026-05-01T02:54:01Z
 parent: holdup-extension-fpjy
 blocked_by:
     - holdup-extension-tbru
