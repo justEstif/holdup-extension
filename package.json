@@ -1,0 +1,21 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "Holdup — a personal nudge engine browser extension",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run format:check && npm run lint -- --max-warnings=0",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.2.1",
+    "globals": "^17.5.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.8.3"
+  },
+  "overrides": {}
+}
