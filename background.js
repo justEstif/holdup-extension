@@ -24,7 +24,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   clearCooldown(host);
 });
 
-chrome.webNavigation.onBeforeNavigate.addListener((details) => {
+chrome.webNavigation.onCompleted.addListener((details) => {
   if (details.frameId !== 0) return;
   handleNavigation(details);
 });
@@ -83,6 +83,10 @@ async function handleMessage(message) {
 async function applyCooldown(host, defaultMinutes) {
   const entry = await HoldupStorage.getEntryByHost(host);
   if (entry?.cooldownType === 'always') return;
+  if (entry?.cooldownType === 'session') {
+    await setSessionCooldown(host);
+    return;
+  }
   const minutes =
     entry?.cooldownType === 'time' ? entry.cooldownMinutes || defaultMinutes : defaultMinutes;
   await setCooldown(host, minutes);
@@ -95,6 +99,13 @@ async function setCooldown(host, minutes) {
   const domains = await HoldupStorage.getEntries();
   await rebuildDynamicRules(domains);
   chrome.alarms.create(`cooldown_${host}`, { delayInMinutes: minutes });
+}
+
+async function setSessionCooldown(host) {
+  const key = `cooldown_${host}`;
+  await chrome.storage.session.set({ [key]: Infinity });
+  const domains = await HoldupStorage.getEntries();
+  await rebuildDynamicRules(domains);
 }
 
 async function clearCooldown(host) {

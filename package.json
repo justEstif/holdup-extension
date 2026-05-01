@@ -7,15 +7,18 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run format:check && npm run lint -- --max-warnings=0",
+    "build:css": "npx @tailwindcss/cli -i src/tailwind.css -o css/tailwind.css --minify",
+    "check": "npm run build:css && npm run format:check && npm run lint -- --max-warnings=0",
     "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@tailwindcss/cli": "^4.2.4",
     "eslint": "^10.2.1",
     "globals": "^17.5.0",
     "husky": "^9.1.7",
-    "prettier": "^3.8.3"
+    "prettier": "^3.8.3",
+    "tailwindcss": "^4.2.4"
   },
   "overrides": {}
 }

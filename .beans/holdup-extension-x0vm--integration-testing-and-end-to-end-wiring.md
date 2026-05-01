@@ -1,10 +1,11 @@
 ---
 # holdup-extension-x0vm
 title: Integration testing and end-to-end wiring
-status: todo
+status: in-progress
 type: task
+priority: normal
 created_at: 2026-05-01T01:56:29Z
-updated_at: 2026-05-01T01:56:29Z
+updated_at: 2026-05-01T03:25:39Z
 parent: holdup-extension-fpjy
 blocked_by:
     - holdup-extension-mrod
