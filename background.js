@@ -56,18 +56,19 @@ function findActiveMatch(domains, hostname) {
 async function routeMatch(tabId, match) {
   if (await isOnCooldown(match.host)) return;
   if (match.mode === 'overlay') {
-    injectOverlay(tabId, match);
+    const theme = await getResolvedTheme();
+    injectOverlay(tabId, match, theme);
   }
 }
 
-function injectOverlay(tabId, entry) {
+function injectOverlay(tabId, entry, theme) {
   chrome.scripting
     .executeScript({
       target: { tabId },
       files: ['content.js'],
     })
     .then(() => {
-      chrome.tabs.sendMessage(tabId, { action: 'show-overlay', entry });
+      chrome.tabs.sendMessage(tabId, { action: 'show-overlay', entry, theme });
     });
 }
 
@@ -157,6 +158,13 @@ function buildRedirectRule(domain, index) {
       resourceTypes: ['main_frame'],
     },
   };
+}
+
+async function getResolvedTheme() {
+  const result = await chrome.storage.sync.get('theme');
+  const pref = result.theme || 'system';
+  if (pref === 'dark' || pref === 'light') return pref;
+  return 'system';
 }
 
 async function isOnCooldown(host) {

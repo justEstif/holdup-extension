@@ -13,6 +13,7 @@ export default [
         chrome: 'readonly',
         globalThis: 'writable',
         HoldupStorage: 'readonly',
+        HoldupTheme: 'readonly',
       },
     },
     rules: {

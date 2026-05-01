@@ -6,29 +6,44 @@
     <title>Holdup — Settings</title>
     <link rel="stylesheet" href="css/tailwind.css" />
   </head>
-  <body class="max-w-2xl mx-auto p-6 bg-slate-50 min-h-screen">
-    <h1 class="text-2xl font-bold text-slate-800 mb-8">Holdup — Settings</h1>
+  <body
+    class="max-w-2xl mx-auto p-6 bg-slate-50 min-h-screen dark:bg-slate-900 dark:text-slate-200"
+  >
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-100">Holdup — Settings</h1>
+      <select
+        id="themeSelect"
+        class="px-3 py-1.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+      >
+        <option value="system">System</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </div>
 
-    <form id="domainForm" class="bg-white rounded-xl border border-slate-200 p-5 mb-6">
-      <h2 class="text-lg font-semibold text-slate-800 mb-4">Add Domain</h2>
+    <form
+      id="domainForm"
+      class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 mb-6"
+    >
+      <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Add Domain</h2>
       <div class="flex flex-col sm:flex-row gap-3 mb-4">
         <input
           id="hostInput"
           type="text"
           placeholder="e.g. claude.ai"
           required
-          class="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+          class="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
         />
         <input
           id="messageInput"
           type="text"
           placeholder="Nudge message"
           required
-          class="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+          class="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
         />
         <select
           id="modeInput"
-          class="bg-white px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+          class="bg-white dark:bg-slate-700 dark:text-slate-200 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
         >
           <option value="overlay">Overlay</option>
           <option value="redirect">Fullscreen</option>
@@ -37,16 +52,19 @@
       <button
         type="button"
         id="advancedToggle"
-        class="text-sm text-slate-500 hover:text-amber-600 cursor-pointer"
+        class="text-sm text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer"
       >
         ▸ Advanced
       </button>
       <div id="advancedSection" class="hidden mt-4 space-y-3">
         <div>
-          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Cooldown</label>
+          <label
+            class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide"
+            >Cooldown</label
+          >
           <select
             id="cooldownTypeInput"
-            class="mt-1 w-full bg-white px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+            class="mt-1 w-full bg-white dark:bg-slate-700 dark:text-slate-200 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
           >
             <option value="session">Until browser restart</option>
             <option value="time">For specified minutes</option>
@@ -54,7 +72,8 @@
           </select>
         </div>
         <div id="cooldownMinutesGroup" class="hidden">
-          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide"
+          <label
+            class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide"
             >Cooldown minutes</label
           >
           <input
@@ -62,18 +81,19 @@
             type="number"
             min="1"
             value="30"
-            class="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+            class="mt-1 w-full px-3 py-2 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
           />
         </div>
         <div>
-          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide"
+          <label
+            class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide"
             >Redirect URL</label
           >
           <input
             id="redirectUrlInput"
             type="url"
             placeholder="https://example.com"
-            class="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+            class="mt-1 w-full px-3 py-2 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
           />
         </div>
       </div>
@@ -88,11 +108,12 @@
     </form>
 
     <div id="domainList" class="space-y-3"></div>
-    <p id="emptyState" class="hidden text-sm text-slate-400 text-center py-8">
+    <p id="emptyState" class="hidden text-sm text-slate-400 dark:text-slate-500 text-center py-8">
       No domains configured yet.
     </p>
 
     <script src="storage.js"></script>
+    <script src="theme.js"></script>
     <script src="options.js"></script>
   </body>
 </html>
