@@ -4,7 +4,7 @@
 importScripts('./storage.js');
 
 chrome.runtime.onInstalled.addListener(() => {
-  ensureDomainsExist();
+  initOnInstalled();
 });
 
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -14,7 +14,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  handleInterstitialMessage(message).then(() => sendResponse({ ok: true }));
+  handleMessage(message).then(() => sendResponse({ ok: true }));
   return true;
 });
 
@@ -29,25 +29,32 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
   handleNavigation(details);
 });
 
-async function ensureDomainsExist() {
-  const entries = await HoldupStorage.getEntries();
-  if (entries.length === 0) return;
+chrome.tabs.onRemoved.addListener(() => {
+  cleanUpTabCooldowns();
+});
+
+async function initOnInstalled() {
+  const domains = await HoldupStorage.getEntries();
+  await rebuildDynamicRules(domains);
 }
 
 async function handleNavigation(details) {
   const url = new URL(details.url);
   if (!url.protocol.startsWith('http')) return;
   const domains = await HoldupStorage.getEntries();
-  const match = findMatch(domains, url.hostname);
+  const match = findActiveMatch(domains, url.hostname);
   if (!match) return;
-  handleMatch(details.tabId, match);
+  await routeMatch(details.tabId, match);
 }
 
-function findMatch(domains, hostname) {
-  return domains.find((d) => hostname === d.host || hostname.endsWith(`.${d.host}`));
+function findActiveMatch(domains, hostname) {
+  return domains.find(
+    (d) => d.enabled !== false && (hostname === d.host || hostname.endsWith(`.${d.host}`)),
+  );
 }
 
-function handleMatch(tabId, match) {
+async function routeMatch(tabId, match) {
+  if (await isOnCooldown(match.host)) return;
   if (match.mode === 'overlay') {
     injectOverlay(tabId, match);
   }
@@ -64,15 +71,16 @@ function injectOverlay(tabId, entry) {
     });
 }
 
-async function handleInterstitialMessage(message) {
-  if (message.action === 'continue') {
-    await applyContinueCooldown(message.entryHost, message.cooldownMinutes || 30);
-  } else if (message.action === 'remind') {
-    await setCooldown(message.entryHost, message.delayMinutes || 5);
+async function handleMessage(message) {
+  const { action, entryHost } = message;
+  if (action === 'continue' || action === 'go-back') {
+    await applyCooldown(entryHost, message.cooldownMinutes || 30);
+  } else if (action === 'remind') {
+    await setCooldown(entryHost, message.delayMinutes || 5);
   }
 }
 
-async function applyContinueCooldown(host, defaultMinutes) {
+async function applyCooldown(host, defaultMinutes) {
   const entry = await HoldupStorage.getEntryByHost(host);
   if (entry?.cooldownType === 'always') return;
   const minutes =
@@ -96,6 +104,12 @@ async function clearCooldown(host) {
   await rebuildDynamicRules(domains);
 }
 
+function cleanUpTabCooldowns() {
+  // Future hook for per-tab cooldown cleanup.
+  // Current cooldown model is domain-based (session storage + alarms),
+  // so no per-tab state to clean up yet.
+}
+
 async function rebuildDynamicRules(domains) {
   const oldRules = await chrome.declarativeNetRequest.getDynamicRules();
   const removeRuleIds = oldRules.map((r) => r.id);
@@ -108,6 +122,7 @@ async function filterActiveRedirects(domains) {
   const results = [];
   for (const d of domains) {
     if (d.mode !== 'redirect') continue;
+    if (d.enabled === false) continue;
     if (await isOnCooldown(d.host)) continue;
     results.push(d);
   }
