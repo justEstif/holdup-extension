@@ -4,6 +4,12 @@ Personal nudge engine. Set reminders for sites. Get interrupted by your own word
 
 ## Install
 
+**Chrome Web Store** (recommended):
+
+[![Install from Chrome Web Store](https://img.shields.io/badge/Install-Chrome%20Web%20Store-amber?style=flat-square)](https://chromewebstore.google.com/detail/holdup/cgpkmnkjkkccjfimgkkggkkackpbbljp)
+
+**Manual (developer)**:
+
 ```
 git clone https://github.com/justEstif/holdup-extension.git
 ```
