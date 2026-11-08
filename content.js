@@ -5,9 +5,11 @@
   'use strict';
 
   let shadowHost = null;
+  let currentEntry = null;
 
   function showOverlay(entry, theme) {
     if (shadowHost) return;
+    currentEntry = entry;
     const isDark = theme === 'dark';
     shadowHost = document.createElement('div');
     shadowHost.id = 'holdup-overlay-host';
@@ -117,9 +119,10 @@
   }
 
   function handleKeyDown(e) {
-    if (e.key === 'Escape') {
-      removeOverlay();
-    }
+    if (e.key !== 'Escape' || !currentEntry) return;
+    chrome.runtime.sendMessage({ action: 'go-back', entryHost: currentEntry.host });
+    removeOverlay();
+    window.history.back();
   }
 
   function removeOverlay() {
