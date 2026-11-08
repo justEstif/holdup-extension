@@ -13,8 +13,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  handleMessage(message).then(() => sendResponse({ ok: true }));
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  handleMessage(message, sender).then(() => sendResponse({ ok: true }));
   return true;
 });
 
@@ -72,10 +72,13 @@ function injectOverlay(tabId, entry, theme) {
     });
 }
 
-async function handleMessage(message) {
+async function handleMessage(message, sender) {
   const { action, entryHost } = message;
   if (action === 'continue' || action === 'go-back') {
     await applyCooldown(entryHost, message.cooldownMinutes || 30);
+    if (action === 'go-back' && sender?.tab?.id != null) {
+      chrome.tabs.goBack(sender.tab.id);
+    }
   } else if (action === 'remind') {
     await setCooldown(entryHost, message.delayMinutes || 5);
   }

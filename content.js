@@ -57,7 +57,6 @@
     shadow.getElementById('holdup-leave').addEventListener('click', () => {
       chrome.runtime.sendMessage({ action: 'go-back', entryHost: entry.host });
       removeOverlay();
-      window.history.back();
     });
   }
 
@@ -122,7 +121,6 @@
     if (e.key !== 'Escape' || !currentEntry) return;
     chrome.runtime.sendMessage({ action: 'go-back', entryHost: currentEntry.host });
     removeOverlay();
-    window.history.back();
   }
 
   function removeOverlay() {
