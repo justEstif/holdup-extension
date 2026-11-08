@@ -60,7 +60,8 @@
   }
 
   function wireDismiss(shadow, entry) {
-    shadow.getElementById('holdup-dismiss').addEventListener('click', () => {
+    const btn = shadow.getElementById('holdup-dismiss');
+    btn.addEventListener('click', () => {
       const cooldown = entry.cooldownMinutes || 30;
       chrome.runtime.sendMessage({
         action: 'continue',
@@ -69,6 +70,29 @@
       });
       removeOverlay();
     });
+    startCountdown(btn, entry.delaySeconds || 0);
+  }
+
+  function startCountdown(btn, delaySeconds) {
+    if (delaySeconds <= 0) return;
+    btn.disabled = true;
+    const render = (remaining) => {
+      const min = Math.floor(remaining / 60);
+      const sec = String(remaining % 60).padStart(2, '0');
+      btn.textContent = `Dismiss (${min}:${sec})`;
+    };
+    render(delaySeconds);
+    let remaining = delaySeconds;
+    const timer = setInterval(() => {
+      remaining -= 1;
+      if (remaining > 0) {
+        render(remaining);
+        return;
+      }
+      clearInterval(timer);
+      btn.disabled = false;
+      btn.textContent = 'Dismiss';
+    }, 1000);
   }
 
   function wireRemind(shadow, entry) {
@@ -150,6 +174,7 @@
 .btn-dismiss{flex:1;padding:10px 20px;background:${dismissBg};color:${dismissText};font-weight:500;font-size:14px;border-radius:12px;border:none;cursor:pointer;transition:background-color .15s;font-family:inherit}
 .btn-dismiss:hover{background:${dismissHover}}
 .btn-dismiss:focus-visible{outline:2px solid #fbbf24;outline-offset:2px}
+.btn-dismiss:disabled{cursor:default;opacity:.55}
 .links{margin-top:16px}
 .link{font-size:14px;color:${linkColor};background:none;border:none;cursor:pointer;transition:color .15s;font-family:inherit}
 .link:hover{color:${linkHover}}
