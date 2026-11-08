@@ -13,8 +13,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  handleMessage(message).then(() => sendResponse({ ok: true }));
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  handleMessage(message, sender).then(() => sendResponse({ ok: true }));
   return true;
 });
 
@@ -72,10 +72,13 @@ function injectOverlay(tabId, entry, theme) {
     });
 }
 
-async function handleMessage(message) {
+async function handleMessage(message, sender) {
   const { action, entryHost } = message;
   if (action === 'continue' || action === 'go-back') {
     await applyCooldown(entryHost, message.cooldownMinutes || 30);
+    if (action === 'go-back' && sender?.tab?.id != null) {
+      chrome.tabs.goBack(sender.tab.id);
+    }
   } else if (action === 'remind') {
     await setCooldown(entryHost, message.delayMinutes || 5);
   }
@@ -104,7 +107,10 @@ async function setCooldown(host, minutes) {
 
 async function setSessionCooldown(host) {
   const key = `cooldown_${host}`;
-  await chrome.storage.session.set({ [key]: Infinity });
+  // chrome.storage JSON-serializes values, so Infinity becomes null on read.
+  // Use a finite sentinel: storage keeps it, and storage.session still clears
+  // on browser exit, so session semantics are unchanged.
+  await chrome.storage.session.set({ [key]: Number.MAX_SAFE_INTEGER });
   const domains = await HoldupStorage.getEntries();
   await rebuildDynamicRules(domains);
 }
@@ -133,26 +139,37 @@ async function rebuildDynamicRules(domains) {
 async function filterActiveRedirects(domains) {
   const results = [];
   for (const d of domains) {
-    if (d.mode !== 'redirect') continue;
     if (d.enabled === false) continue;
     if (await isOnCooldown(d.host)) continue;
-    results.push(d);
+    if (d.mode === 'redirect') results.push(d);
+    else if (d.mode === 'silent-redirect' && isValidHttpUrl(d.redirectUrl)) results.push(d);
   }
   return results;
+}
+
+function isValidHttpUrl(str) {
+  if (!str) return false;
+  try {
+    const url = new URL(str);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
 }
 
 function buildRedirectRule(domain, index) {
   const entryParam = encodeURIComponent(domain.host);
   const msgParam = encodeURIComponent(domain.message);
+  const redirect =
+    domain.mode === 'silent-redirect' && isValidHttpUrl(domain.redirectUrl)
+      ? { url: domain.redirectUrl }
+      : {
+          extensionPath: `/pages/interstitial/interstitial.html?entry=${entryParam}&msg=${msgParam}`,
+        };
   return {
     id: index + 1,
     priority: 1,
-    action: {
-      type: 'redirect',
-      redirect: {
-        extensionPath: `/pages/interstitial/interstitial.html?entry=${entryParam}&msg=${msgParam}`,
-      },
-    },
+    action: { type: 'redirect', redirect },
     condition: {
       urlFilter: `||${domain.host}/`,
       resourceTypes: ['main_frame'],

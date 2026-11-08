@@ -14,11 +14,16 @@ const advancedToggle = byId('advancedToggle'),
   cooldownTypeInput = byId('cooldownTypeInput'),
   cooldownMinutesGroup = byId('cooldownMinutesGroup'),
   cooldownMinutesInput = byId('cooldownMinutesInput'),
-  redirectUrlInput = byId('redirectUrlInput');
+  redirectUrlInput = byId('redirectUrlInput'),
+  delaySecondsInput = byId('delaySecondsInput');
 
 const domainList = byId('domainList'),
   emptyState = byId('emptyState'),
-  themeSelect = byId('themeSelect');
+  themeSelect = byId('themeSelect'),
+  importTextarea = byId('importTextarea'),
+  importBtn = byId('importBtn'),
+  exportBtn = byId('exportBtn'),
+  importSummary = byId('importSummary');
 
 let editingId = null;
 
@@ -26,6 +31,8 @@ form.addEventListener('submit', handleAdd);
 advancedToggle.addEventListener('click', toggleAdvanced);
 cooldownTypeInput.addEventListener('change', toggleCooldownMinutes);
 themeSelect.addEventListener('change', handleThemeChange);
+importBtn.addEventListener('click', handleImport);
+exportBtn.addEventListener('click', handleExport);
 
 async function loadEntries() {
   const domains = await HoldupStorage.getEntries();
@@ -106,6 +113,7 @@ function buildEditHtml(entry) {
   const ct = entry.cooldownType || 'session';
   const cm = entry.cooldownMinutes || 30;
   const ru = escapeHtml(entry.redirectUrl || '');
+  const ds = entry.delaySeconds || 0;
   const cls =
     'mt-1 w-full px-3 py-2 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent';
   return `<div class="space-y-3">
@@ -115,25 +123,32 @@ function buildEditHtml(entry) {
     <input class="edit-message ${cls}" value="${msg}" /></div>
   <div><label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Mode</label>
     <select class="edit-mode bg-white dark:bg-slate-700 dark:text-slate-200 ${cls}">
-      <option value="overlay" ${entry.mode === 'overlay' ? 'selected' : ''}>Overlay</option>
-      <option value="redirect" ${entry.mode === 'redirect' ? 'selected' : ''}>Fullscreen</option>
+      <option value="overlay" ${sel(entry.mode, 'overlay')}>Overlay</option>
+      <option value="redirect" ${sel(entry.mode, 'redirect')}>Fullscreen</option>
+      <option value="silent-redirect" ${sel(entry.mode, 'silent-redirect')}>Silent redirect</option>
     </select></div>
   <div><label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Cooldown</label>
     <select class="edit-cooldown-type bg-white dark:bg-slate-700 dark:text-slate-200 ${cls}">
-      <option value="session" ${ct === 'session' ? 'selected' : ''}>Until browser restart</option>
-      <option value="time" ${ct === 'time' ? 'selected' : ''}>For specified minutes</option>
-      <option value="always" ${ct === 'always' ? 'selected' : ''}>Always ask</option>
+      <option value="session" ${sel(ct, 'session')}>Until browser restart</option>
+      <option value="time" ${sel(ct, 'time')}>For specified minutes</option>
+      <option value="always" ${sel(ct, 'always')}>Always ask</option>
     </select></div>
   <div class="edit-cooldown-minutes-group ${ct !== 'time' ? 'hidden' : ''}">
     <label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Cooldown minutes</label>
     <input class="edit-cooldown-minutes ${cls}" type="number" min="1" value="${cm}" /></div>
   <div><label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Redirect URL</label>
     <input class="edit-redirect-url ${cls}" type="url" value="${ru}" placeholder="https://example.com" /></div>
+  <div><label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Delay seconds</label>
+    <input class="edit-delay-seconds ${cls}" type="number" min="0" value="${ds}" /></div>
   <div class="flex gap-3 pt-2">
     <button type="button" class="save-btn px-4 py-2 bg-amber-500 text-white text-sm font-semibold rounded-lg hover:bg-amber-600 transition-colors">Save</button>
     <button type="button" class="cancel-btn px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">Cancel</button>
   </div>
 </div>`;
+}
+
+function sel(value, option) {
+  return value === option ? 'selected' : '';
 }
 
 function wireEditCard(card) {
@@ -171,6 +186,7 @@ function collectEditFields(card) {
     cooldownType: card.querySelector('.edit-cooldown-type').value,
     cooldownMinutes: parseInt(card.querySelector('.edit-cooldown-minutes').value, 10) || 30,
     redirectUrl: card.querySelector('.edit-redirect-url').value.trim(),
+    delaySeconds: parseInt(card.querySelector('.edit-delay-seconds').value, 10) || 0,
   };
 }
 
@@ -199,7 +215,16 @@ async function handleAdd(e) {
   const cooldownType = cooldownTypeInput.value;
   const cooldownMinutes = parseInt(cooldownMinutesInput.value, 10) || 30;
   const redirectUrl = redirectUrlInput.value.trim();
-  await HoldupStorage.addEntry({ host, message, mode, cooldownType, cooldownMinutes, redirectUrl });
+  const delaySeconds = parseInt(delaySecondsInput.value, 10) || 0;
+  await HoldupStorage.addEntry({
+    host,
+    message,
+    mode,
+    cooldownType,
+    cooldownMinutes,
+    redirectUrl,
+    delaySeconds,
+  });
   resetForm();
   editingId = null;
   loadEntries();
@@ -211,6 +236,7 @@ function resetForm() {
   redirectUrlInput.value = '';
   cooldownTypeInput.value = 'session';
   cooldownMinutesInput.value = '30';
+  delaySecondsInput.value = '0';
   cooldownMinutesGroup.classList.add('hidden');
   advancedSection.classList.add('hidden');
   advancedToggle.textContent = '▸ Advanced';
@@ -230,6 +256,79 @@ function toggleEditCooldown(card) {
   const select = card.querySelector('.edit-cooldown-type');
   const group = card.querySelector('.edit-cooldown-minutes-group');
   group.classList.toggle('hidden', select.value !== 'time');
+}
+
+const IMPORT_MODES = ['overlay', 'redirect', 'silent-redirect'];
+
+async function handleExport() {
+  const domains = await HoldupStorage.getEntries();
+  importTextarea.value = JSON.stringify(domains, null, 2);
+  showImportSummary(`Exported ${domains.length} ${domains.length === 1 ? 'entry' : 'entries'}.`);
+}
+
+async function handleImport() {
+  let parsed;
+  try {
+    parsed = JSON.parse(importTextarea.value);
+  } catch {
+    showImportSummary('Import failed: not valid JSON.');
+    return;
+  }
+  if (!Array.isArray(parsed)) {
+    showImportSummary('Import failed: expected a JSON array of entries.');
+    return;
+  }
+  const valid = parsed.filter(isValidImportRow).map(normalizeImportRow);
+  const skipped = parsed.length - valid.length;
+  const counts = await mergeImportedEntries(valid);
+  loadEntries();
+  showImportSummary(`Added ${counts.added}, updated ${counts.updated}, skipped ${skipped}.`);
+}
+
+async function mergeImportedEntries(rows) {
+  const entries = await HoldupStorage.getEntries();
+  let added = 0;
+  let updated = 0;
+  for (const row of rows) {
+    const existing = entries.find((e) => e.host === row.host);
+    if (existing) {
+      await HoldupStorage.updateEntry(existing.id, row);
+      updated += 1;
+    } else {
+      await HoldupStorage.addEntry(row);
+      added += 1;
+    }
+  }
+  return { added, updated };
+}
+
+function isValidImportRow(row) {
+  if (!row || typeof row !== 'object') return false;
+  if (typeof row.host !== 'string' || !row.host.trim()) return false;
+  if (row.mode !== undefined && !IMPORT_MODES.includes(row.mode)) return false;
+  return (
+    isNumberOrMissing(row.cooldownMinutes) &&
+    isNumberOrMissing(row.delaySeconds) &&
+    isNumberOrMissing(row.remindDelayMinutes)
+  );
+}
+
+function isNumberOrMissing(value) {
+  return value === undefined || value === null || typeof value === 'number';
+}
+
+function normalizeImportRow(row) {
+  return {
+    ...row,
+    host: row.host.trim(),
+    cooldownMinutes: row.cooldownMinutes ?? 30,
+    delaySeconds: row.delaySeconds ?? 0,
+    remindDelayMinutes: row.remindDelayMinutes ?? 5,
+  };
+}
+
+function showImportSummary(text) {
+  importSummary.textContent = text;
 }
 
 function handleThemeChange() {
