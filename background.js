@@ -107,7 +107,10 @@ async function setCooldown(host, minutes) {
 
 async function setSessionCooldown(host) {
   const key = `cooldown_${host}`;
-  await chrome.storage.session.set({ [key]: Infinity });
+  // chrome.storage JSON-serializes values, so Infinity becomes null on read.
+  // Use a finite sentinel: storage keeps it, and storage.session still clears
+  // on browser exit, so session semantics are unchanged.
+  await chrome.storage.session.set({ [key]: Number.MAX_SAFE_INTEGER });
   const domains = await HoldupStorage.getEntries();
   await rebuildDynamicRules(domains);
 }
