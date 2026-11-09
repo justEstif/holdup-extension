@@ -13,6 +13,7 @@
     cooldownMinutes: 30,
     delaySeconds: 0,
     redirectUrl: '',
+    allowFrom: [],
     enabled: true,
   };
 

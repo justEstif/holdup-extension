@@ -166,14 +166,19 @@ function buildRedirectRule(domain, index) {
       : {
           extensionPath: `/pages/interstitial/interstitial.html?entry=${entryParam}&msg=${msgParam}`,
         };
+  const condition = {
+    urlFilter: `||${domain.host}/`,
+    resourceTypes: ['main_frame'],
+  };
+  const allowed = (domain.allowFrom || []).filter((h) => typeof h === 'string' && h.trim());
+  if (allowed.length > 0) {
+    condition.excludedInitiatorDomains = allowed.map((h) => h.trim());
+  }
   return {
     id: index + 1,
     priority: 1,
     action: { type: 'redirect', redirect },
-    condition: {
-      urlFilter: `||${domain.host}/`,
-      resourceTypes: ['main_frame'],
-    },
+    condition,
   };
 }
 

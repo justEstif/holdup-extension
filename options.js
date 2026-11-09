@@ -302,6 +302,11 @@ async function mergeImportedEntries(rows) {
   return { added, updated };
 }
 
+function hasValidAllowFrom(row) {
+  if (row.allowFrom === undefined) return true;
+  return Array.isArray(row.allowFrom) && row.allowFrom.every((h) => typeof h === 'string');
+}
+
 function isValidImportRow(row) {
   if (!row || typeof row !== 'object') return false;
   if (typeof row.host !== 'string' || !row.host.trim()) return false;
@@ -309,7 +314,8 @@ function isValidImportRow(row) {
   return (
     isNumberOrMissing(row.cooldownMinutes) &&
     isNumberOrMissing(row.delaySeconds) &&
-    isNumberOrMissing(row.remindDelayMinutes)
+    isNumberOrMissing(row.remindDelayMinutes) &&
+    hasValidAllowFrom(row)
   );
 }
 
